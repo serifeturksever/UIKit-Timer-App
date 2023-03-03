@@ -61,6 +61,7 @@ class ViewController: UIViewController {
         stopBtn.setTitleColor(.purple, for: .highlighted)
         stopBtn.translatesAutoresizingMaskIntoConstraints = false
         stopBtn.addTarget(self, action: #selector(stop), for: .touchUpInside)
+        stopBtn.isHidden = true // when start button is clicked, isHidden is going to be "true"
         
         view.addSubview(stopBtn)
         
@@ -77,17 +78,18 @@ class ViewController: UIViewController {
         resetBtn.setTitleColor(.purple, for: .highlighted)
         resetBtn.translatesAutoresizingMaskIntoConstraints = false
         resetBtn.addTarget(self, action: #selector(reset), for: .touchUpInside)
+        resetBtn.isHidden = true
         
         view.addSubview(resetBtn)
         
         NSLayoutConstraint.activate([
             startBtn.topAnchor.constraint(equalTo: timerText.bottomAnchor, constant: 20),
             startBtn.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            stopBtn.topAnchor.constraint(equalTo: startBtn.bottomAnchor, constant: 20),
+            stopBtn.topAnchor.constraint(equalTo: timerText.bottomAnchor, constant: 20),
             stopBtn.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             tourBtn.topAnchor.constraint(equalTo: stopBtn.bottomAnchor, constant: 20),
             tourBtn.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            resetBtn.topAnchor.constraint(equalTo: tourBtn.bottomAnchor, constant: 20),
+            resetBtn.topAnchor.constraint(equalTo: startBtn.bottomAnchor, constant: 20),
             resetBtn.centerXAnchor.constraint(equalTo: view.centerXAnchor)
         ])
         
@@ -100,17 +102,23 @@ class ViewController: UIViewController {
     
     @objc private func start(){
         timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(countDown), userInfo: nil, repeats: true)
+        self.startBtn.isHidden = true
+        self.stopBtn.isHidden = false
+        self.tourBtn.isHidden = false
+        self.resetBtn.isHidden = true
     }
     
     @objc private func stop(){
-        print("stop button tapped")
         self.timer.invalidate()
+        
+        self.startBtn.isHidden = false
+        self.stopBtn.isHidden = true
+        self.tourBtn.isHidden = true
+        self.resetBtn.isHidden = false
     }
     
     @objc private func tour(){
-        self.tours.append(self.remaining)
-        
-        
+        if (self.remaining != 10){self.tours.append(self.remaining)}
         if !tours.isEmpty {
             var counter = 10
             var tourCount = 1
@@ -132,10 +140,10 @@ class ViewController: UIViewController {
     }
     
     @objc private func reset(){
-        // Has an error
+        // FIXME If user clicks reset before timer start, The app crashes
         self.remaining = 10
         self.timer.invalidate()
-        self.timerText.text = "\(self.remaining)"
+        self.timerText.text = self.remaining < 10 ? "00:0\(self.remaining)" : "00:\(self.remaining)"
     }
     
     @objc private func countDown() {
